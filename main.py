@@ -163,10 +163,13 @@ class MainFiscal:
             ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
 
             try:
+                # se ele pular try quer dizer que os processos já não estão mais cadastrados.
                 
                 caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
 
             except:
+
+
 
                 break
 
@@ -192,7 +195,30 @@ class MainFiscal:
 
         time.sleep(3)
 
-# Aguarde um pouco para visualização (opcional)
+        # agora vem o for pra pegar na "vara " :)
+
+        elemento_selecao = self.drive.find_element(By.XPATH, "//*[@id='frmCadastro:juizo:selectOneMenu_label']").click()
+        
+        # Aguarde um pouco para visualização (opcional)
+        time.sleep(2)
+
+        # Itera sobre os resultados do DataFrame 'Vara Judicial'
+        for vara in dados['Vara Judicial']:
+            print(f'Esta é a vara > {vara}')
+
+            # Clique na opção correspondente ao valor de 'vara'
+            try:
+                opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara}')]")
+                opcao_vara.click()
+
+                # Aguarde um pouco para visualização (opcional)
+                time.sleep(2)
+
+                # Faça aqui o que precisar após clicar na opção
+
+            except Exception as e:
+                print(f"Erro ao clicar na opção da vara {vara}: {e}")
+       
 
 
       
