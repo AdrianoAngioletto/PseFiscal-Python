@@ -6,6 +6,9 @@ import os
 import time
 import shutil
 import pandas as p
+from pathlib import Path
+import glob
+
 
 class MainFiscal:
 
@@ -81,10 +84,71 @@ class MainFiscal:
 
         print(f'TODOS PROCESSOS FORAM CARREGADOS!, NUMERO TOTAL DE PROCESSOS SÃO DE : {len(self.lista_processos)}')
 
+    def Saj(self):
 
+        self.opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
+        self.opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
+        self.drive = webdriver.Chrome(self.opcao)  # aqui uso a opção como argumento, ludmilo.
+              
+        url = 'https://saj.pgfn.fazenda.gov.br/saj/login.jsf?dswid=3754'
+
+        self.drive.get(url) # chama o site
+
+        time.sleep(2)
+
+        campo_login = self.drive.find_element(By.ID, "frmLogin:username")
+
+        campo_senha = self.drive.find_element(By.ID, "frmLogin:password")
+
+        campo_login.send_keys("44355326896")
+
+        campo_senha.send_keys("mundo2024")
+
+        botao_ok = self.drive.find_element(By.ID, "frmLogin:entrar")
+
+        time.sleep(2) 
+
+        botao_ok.click()
+
+        time.sleep(3)
+
+        botao_processo = self.drive.find_element(By.CLASS_NAME, "ui-menuitem-text")  # PEGA  ID DA LISTA > PROCESS
+        
+        webdriver.ActionChains(self.drive).move_to_element(botao_processo).perform() # MOVE MOUSE ATÉ A LISTA 
+
+        time.sleep(1) # TEMPO NECESSARIO
+
+        botao_consulta = self.drive.find_element(By.XPATH, '//*[@id="j_idt15:formMenus:j_idt34"]/ul/li[1]/ul/li[2]').click() # PEGA O ITEM DA LISTA >>> Processo
+
+        time.sleep(7)
+       
+        caminho_absoluto_saj = Path.cwd()
+
+        Pasta_Add_saj = 'Resultado_Processos'
+        
+        Processos = 'dados_processos.xlsx'
+
+        Caminho_Mais_Pasta_saj = caminho_absoluto_saj / Pasta_Add_saj
+
+        Caminho_processo_e_pasta = Caminho_Mais_Pasta_saj / Processos
+
+
+        ler = p.read_excel(Caminho_processo_e_pasta)
+
+        print(ler)
+
+
+ 
         
     def MeioPje(self):
     # ... (código anterior)
+        
+        Pasta_Nova = 'Resultado_Processos'
+
+        if not os.path.exists(Pasta_Nova):
+            os.makedirs(Pasta_Nova)
+
+            print(f" Criando Pasta, {Pasta_Nova}... ")
 
         for numerop in self.lista_processos:
             # AQUI É A PARTE DE CONSULTAR OS PROCESSOS NO PJE, PARA SABER AS CLASSES, PRA SÓ DEPOIS FAZER A CONSULTA
@@ -154,38 +218,46 @@ class MainFiscal:
             dataf = p.DataFrame(conteudo_lista, columns=colunas)
             
             try:
-              
-                if os.path.exists('dados_processos.xlsx'):
-                    dataf_existente = p.read_excel('dados_processos.xlsx')
+                
+                # Criando logica para pegar caminho, e adicionar + o nome da pasta :)
 
-                    # Adicionando novos dados ao DataFrame existente
+                caminho_absoluto = Path.cwd()
+
+                Pasta_Add = 'Resultado_Processos'
+
+                Caminho_Mais_Pasta = caminho_absoluto / Pasta_Add
+              
+                 
+                nome_arquivo = 'dados_processos.xlsx'
+
+                
+                caminho_do_arquivo = Caminho_Mais_Pasta / nome_arquivo
+
+                
+                if caminho_do_arquivo.exists():
+                
+                    dataf_existente = p.read_excel(caminho_do_arquivo)
+
+                  
                     dataf_concatenado = p.concat([dataf_existente, dataf], ignore_index=True)
 
-                    # Salvando o DataFrame atualizado
-                    dataf_concatenado.to_excel('dados_processos.xlsx', index=False)
-
+    
+                    dataf_concatenado.to_excel(caminho_do_arquivo, index=False)
                 else:
-                    
-                    dataf.to_excel('dados_processos.xlsx', index=False)
+                   
+                    dataf.to_excel(caminho_do_arquivo, index=False)
 
             except Exception as e:
-                print(f"houve algum erro: {e}")
+                print(f"Houve algum erro: {e}")
 
                                  
         nova_url = "https://pje1g.trf3.jus.br/pje/ConsultaPublica/listView.seam"
         self.drive.get(nova_url)
         time.sleep(5)
- 
 
-    
-    def FinalSaj(self):
 
-       # falta fazer parte do cadastro.
-   
-    
-   
-cl = MainFiscal()
-cl.VerificaSeExiste()
-cl.Inicio()
-cl.MeioPje()
-cl.FinalSaj()
+
+Cl = MainFiscal()
+Cl.VerificaSeExiste()
+Cl.Inicio()
+Cl.Saj()
