@@ -124,25 +124,52 @@ class MainFiscal:
        
         caminho_absoluto_saj = Path.cwd()
 
-        Pasta_Add_saj = 'Resultado_Processos'
+        Pasta_Add_saj = \
+            'Resultado_Processos'
         
-        Processos = 'dados_processos.xlsx'
-
+        Processos = \
+              'dados_processos.xlsx'
+        
         Caminho_Mais_Pasta_saj = caminho_absoluto_saj / Pasta_Add_saj
 
-        Caminho_processo_e_pasta = Caminho_Mais_Pasta_saj / Processos
+        # Caminho_processo_e_pasta = Caminho_Mais_Pasta_saj / Processos # se caso precisar ja pega pasta e nome do dados processos
+
+        padrao_arquivo = '*.xlsx' # padrão do excel
+
+        ListaProcessos = glob.glob(str(Caminho_Mais_Pasta_saj / padrao_arquivo))
+
+        lista_processos = []
+
+        for caminho_do_arquivo in ListaProcessos:
+
+            dados = p.read_excel(caminho_do_arquivo)
+           
+        for processos_planilha in dados['Numero do Processo']:
+
+            print(f' Lendo os Processos {processos_planilha}')
+
+            caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input')
+
+            caixa_pesquisa.click()
+
+            time.sleep(1)
+
+            caixa_pesquisa.send_keys(str(processos_planilha))
+
+            time.sleep(1)
+
+            # Clica no botão OK
+            ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
+            
+            time.sleep(5)
+
+            # Aqui você pode fazer mais operações relacionadas ao processamento do processo
 
 
-        ler = p.read_excel(Caminho_processo_e_pasta)
-
-        print(ler)
 
 
- 
         
     def MeioPje(self):
-    # ... (código anterior)
-        
         Pasta_Nova = 'Resultado_Processos'
 
         if not os.path.exists(Pasta_Nova):
