@@ -1,6 +1,7 @@
 
 # PSE FISCAL
 from selenium import webdriver # 
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
 import os 
 import time
@@ -160,12 +161,41 @@ class MainFiscal:
 
             # Clica no botão OK
             ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
-            
-            time.sleep(5)
 
-            # Aqui você pode fazer mais operações relacionadas ao processamento do processo
+            try:
+                
+                caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
+
+            except:
+
+                break
 
 
+
+        clicando_virtual = self.drive.find_element(By. XPATH, '//*[@id="frmCadastro:tiposProcesso"]/tbody/tr/td[3]/div/div[2]').click()
+
+
+        class_div = self.drive.find_element(By. XPATH, '//*[@id="frmCadastro:classe:selectOneMenu_label"]').click()
+
+        time.sleep(2)
+
+        opcao_class_div = self.drive.find_element(By.XPATH, "//li[text()='Execução Fiscal (FGTS e Contr. Sociais da LC 110)']").click()
+
+        time.sleep(3)
+
+
+        vara_div = self.drive.find_element(By.ID, "frmCadastro:tipoJuizo:selectOneMenu").click()
+
+        time.sleep(2)
+
+        opcao_vara_federal = self.drive.find_element(By.XPATH, "//li[text()='Vara Federal']").click()
+
+        time.sleep(3)
+
+# Aguarde um pouco para visualização (opcional)
+
+
+      
 
 
         
