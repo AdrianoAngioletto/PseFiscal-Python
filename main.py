@@ -1,7 +1,8 @@
-
 # PSE FISCAL
 from selenium import webdriver # 
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import os 
 import time
@@ -161,26 +162,30 @@ class MainFiscal:
             # Clica no botão OK
             ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
 
+            
             try:
-                # Se ele pular para o bloco except, significa que os processos já não estão mais cadastrados.
+                    # Se ele pular para o bloco except, significa que os processos já não estão mais cadastrados.
 
-                # Remove os dados da planilha relacionados ao processo
-                indice_processo_cadastrado = dados[dados['Numero do Processo'] == processos_planilha].index
-                dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
+                    # Remove os dados da planilha relacionados ao processo
+                    indice_processo_cadastrado = dados[dados['Numero do Processo'] == processos_planilha].index
+                    dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
 
-                caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
+                    # Definindo a variável de flag como True
+                    processo_encontrado = True
+
+                    caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
 
             except:
-                # Se ele cair no bloco except, significa que os processos já foram lidos, mas não foram cadastrados ainda
-                # Limpa os valores nas colunas 'Data Distribuicao' e 'Vara Judicial' apenas para os processos que passaram no loop
-                dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
+
+                 break
+                    # Se ele cair no bloco except, significa que os processos já foram lidos, mas não foram cadastrados ainda
+                  
+            if processo_encontrado:
+
                 # Salva os dados atualizados de volta à planilha
                 dados.to_excel(caminho_do_arquivo, index=False)
 
-                break
-
-
-
+                
 
         clicando_virtual = self.drive.find_element(By. XPATH, '//*[@id="frmCadastro:tiposProcesso"]/tbody/tr/td[3]/div/div[2]').click()
 
@@ -204,25 +209,48 @@ class MainFiscal:
 
         # agora vem o for pra pegar na "vara " :)
 
-        elemento_selecao = self.drive.find_element(By.XPATH, "//*[@id='frmCadastro:juizo:selectOneMenu_label']").click()
-
         
         time.sleep(2)
 
+        caminho2 = Path.cwd()
+        caminho_mais_pasta = caminho2 / 'Resultado_Processos'
+        arquivo_excel = 'dados_processos*.xlsx'
+        resultado_para_for = caminho_mais_pasta.glob(arquivo_excel)
 
-        for vara in dados['Vara Judicial']:
-            print(f'Esta é a vara > {vara}')
+        for caminho_do_arquivo in resultado_para_for:
+            dados2 = p.read_excel(caminho_do_arquivo)
+
+            for vara_judicial in dados2['Vara Judicial']:
+                
+                vara_judicial_formatada = vara_judicial.replace('São Paulo', '- SAO PAULO')
+
+                print(vara_judicial_formatada)
+    
+                print(f' Lendo a Vara Judicial: {vara_judicial}')
+
+                elemento_selecao = self.drive.find_element(By.XPATH, "/html/body/div[7]/div/div/span[1]/form/div[2]/div[2]/div[1]/div[2]/table/tbody/tr[10]/td[2]/span/div/table/tbody/tr/td[1]/div/div/label").click()
+
+        # Localize a opção desejada e clique nela
+                opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara_judicial_formatada}')]").click()
+
+
+                time.sleep(5)
+
+
+
+        # for vara in dados['Vara Judicial']:
+        #     print(f'Esta é a vara > {vara}')
    
-            try:
-                opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara}')]")
+        #     try:
+        #         opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara}')]")
 
-                opcao_vara.click()
+        #         opcao_vara.click()
 
                 
-                time.sleep(2)
+        #         time.sleep(2)
 
-            except Exception as e:
-                print(f"Erro ao clicar na opção da vara {vara}: {e}")
+        #     except Exception as e:
+        #         print(f"Erro ao clicar na opção da vara {vara}: {e}")
        
 
 
