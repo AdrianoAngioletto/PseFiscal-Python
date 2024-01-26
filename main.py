@@ -238,6 +238,41 @@ class MainFiscal:
                 # Localize a opção desejada e clique nela
                 opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara_judicial_formatada}')]").click()
 
+
+                pegando_numero_processo_atual = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumeroProcesso:numeroProcesso"]')
+
+                # Obtenha o valor atual na caixa de entrada
+                numero_processo_atual = pegando_numero_processo_atual.get_attribute('value')
+
+                numero_formatado = numero_processo_atual.replace('-', '').replace('.', '')
+                # Imprima o valor
+                print("Valor na caixa de entrada:", numero_formatado)
+
+
+                caminho_atual = Path.cwd()
+
+                caminho_atual_excel = caminho_atual / 'processos.xlsx'
+
+                dados_p = p.read_excel(caminho_atual_excel)
+
+                existe_numero = numero_formatado in dados_p['PROCESSO TXT'].values
+
+                print(existe_numero)
+
+
+
+                
+                
+
+
+
+
+
+            
+
+
+                
+
                 time.sleep(10)
 
         # for vara in dados['Vara Judicial']:
