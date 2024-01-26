@@ -212,6 +212,7 @@ class MainFiscal:
         
         time.sleep(2)
 
+
         caminho2 = Path.cwd()
         caminho_mais_pasta = caminho2 / 'Resultado_Processos'
         arquivo_excel = 'dados_processos*.xlsx'
@@ -221,22 +222,23 @@ class MainFiscal:
             dados2 = p.read_excel(caminho_do_arquivo)
 
             for vara_judicial in dados2['Vara Judicial']:
-                
+                # Adicione um hífen antes de 'SAO PAULO' e remova o último 'DE'
                 vara_judicial_formatada = vara_judicial.replace('São Paulo', '- SAO PAULO')
+                posicao_ultimo_de = vara_judicial_formatada.rfind(' de ')
 
-                print(vara_judicial_formatada)
-    
-                print(f' Lendo a Vara Judicial: {vara_judicial}')
+                if posicao_ultimo_de != -1:
+                    vara_judicial_formatada = vara_judicial_formatada[:posicao_ultimo_de] + vara_judicial_formatada[posicao_ultimo_de + 3:]
 
+
+                print(f' Lendo a Vara Judicial: {vara_judicial_formatada}')
+
+                # Clique na caixa de seleção para abrir as opções (se necessário)
                 elemento_selecao = self.drive.find_element(By.XPATH, "/html/body/div[7]/div/div/span[1]/form/div[2]/div[2]/div[1]/div[2]/table/tbody/tr[10]/td[2]/span/div/table/tbody/tr/td[1]/div/div/label").click()
 
-        # Localize a opção desejada e clique nela
+                # Localize a opção desejada e clique nela
                 opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara_judicial_formatada}')]").click()
 
-
-                time.sleep(5)
-
-
+                time.sleep(10)
 
         # for vara in dados['Vara Judicial']:
         #     print(f'Esta é a vara > {vara}')
@@ -255,7 +257,6 @@ class MainFiscal:
 
 
       
-
 
         
     def MeioPje(self):
