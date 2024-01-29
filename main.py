@@ -1,5 +1,8 @@
 # PSE FISCAL
 from selenium import webdriver # 
+import ast
+import re
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -222,8 +225,16 @@ class MainFiscal:
             dados2 = p.read_excel(caminho_do_arquivo)
 
             for vara_judicial in dados2['Vara Judicial']:
-                # Adicione um hífen antes de 'SAO PAULO' e remova o último 'DE'
-                vara_judicial_formatada = vara_judicial.replace('São Paulo', '- SAO PAULO')
+                # ADICONA UM HIFEN PARA PODER CONSULTAR NO SAJ, E TENTA REMOVER O ULTIMO "DE" COM EXPRESSAO REGULAR, AO MENOS ESTÁ FUNCIONANDO.
+
+                try:
+                    vara_judicial_formatada = vara_judicial.replace('São Paulo', '- SAO PAULO')
+
+                except:    
+                          
+                    continue
+
+
                 posicao_ultimo_de = vara_judicial_formatada.rfind(' de ')
 
                 if posicao_ultimo_de != -1:
@@ -232,20 +243,20 @@ class MainFiscal:
 
                 print(f' Lendo a Vara Judicial: {vara_judicial_formatada}')
 
-                # Clique na caixa de seleção para abrir as opções (se necessário)
+               
                 elemento_selecao = self.drive.find_element(By.XPATH, "/html/body/div[7]/div/div/span[1]/form/div[2]/div[2]/div[1]/div[2]/table/tbody/tr[10]/td[2]/span/div/table/tbody/tr/td[1]/div/div/label").click()
 
-                # Localize a opção desejada e clique nela
+               
                 opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara_judicial_formatada}')]").click()
 
 
                 pegando_numero_processo_atual = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumeroProcesso:numeroProcesso"]')
 
-                # Obtenha o valor atual na caixa de entrada
+                # PEGANDO VALOR DO PROCESSO
                 numero_processo_atual = pegando_numero_processo_atual.get_attribute('value')
 
                 numero_formatado = numero_processo_atual.replace('-', '').replace('.', '')
-                # Imprima o valor
+                # IMPRIMINDO VALOR 
                 print("Valor na caixa de entrada:", numero_formatado)
 
 
@@ -255,11 +266,61 @@ class MainFiscal:
 
                 dados_p = p.read_excel(caminho_atual_excel)
 
-                existe_numero = numero_formatado in dados_p['PROCESSO TXT'].values
+                if numero_formatado in dados_p['PROCESSO TXT'].values:
 
-                print(existe_numero)
+                    #  coluna 'CONTRATOS'
+                    processo_cda = dados_p.loc[dados_p['PROCESSO TXT'] == numero_formatado, 'CONTRATOS'].values
+                    
+                    
+                    print(f'Numero de Processo, e CDA  {numero_formatado}: {processo_cda}')
+
+                else:
+                    print(f'O número {numero_formatado} não foi encontrado na coluna "PROCESSO TXT".')
+
+                
+                processo_cda_str = str(processo_cda[0]) # converte string objeto numpy
 
 
+                if len(processo_cda_str) > 13: # verifico se tem duas CDAS se tiver vai ter que ser cadastrado duas vezes
+        
+                    expressao_do_diabo_regular = re.compile(r'\b(\w+\d+)\b')
+                    processo_cda_lista = expressao_do_diabo_regular.findall(processo_cda_str)
+
+                    valor_cda1 = processo_cda_lista[0]
+                    valor_cda2 = processo_cda_lista[1]
+
+                    print(valor_cda2)
+
+
+                    caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
+
+                    caixa_colocar_cda.click()  
+
+                    caixa_colocar_cda.send_keys(valor_cda1)
+
+
+                    botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
+                    botao_incluir.click()
+
+                    time.sleep(1)
+
+                    
+                    caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
+                    caixa_colocar_cda.click() 
+                    caixa_colocar_cda.send_keys(valor_cda2)
+
+                    botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
+                    botao_incluir.click()
+
+
+
+
+
+
+
+
+
+     
 
                 
                 
@@ -317,7 +378,7 @@ class MainFiscal:
             # Esse FOR é necessário, por que quem fez o pje, colocou "máscara de entrada", para dificultar o trabalho.
             for caractere in numerop:
                 pega_numero.send_keys(caractere)
-                time.sleep(0.1)
+                
 
             print(f"Consultando processo: {numerop}")
 
@@ -337,7 +398,6 @@ class MainFiscal:
 
                     continue
 
-            time.sleep(3)
 
             # pegando as guias
             guias = self.drive.window_handles
@@ -348,7 +408,7 @@ class MainFiscal:
             indice_guia = 1  #
             self.drive.switch_to.window(guias[indice_guia])  # TROCANDO DE PÁGINA, TENDEU !!
 
-            time.sleep(3)
+            time.sleep(1)
 
             conteudo_lista = []
 
@@ -405,7 +465,7 @@ class MainFiscal:
                                  
         nova_url = "https://pje1g.trf3.jus.br/pje/ConsultaPublica/listView.seam"
         self.drive.get(nova_url)
-        time.sleep(5)
+        time.sleep(3)
 
 
 
