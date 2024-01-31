@@ -1,5 +1,6 @@
 # PSE FISCAL
-from selenium import webdriver # 
+from selenium import webdriver #
+from datetime import datetime 
 import ast
 import re
 from selenium.common.exceptions import NoSuchElementException
@@ -17,8 +18,21 @@ import glob
 
 class MainFiscal:
 
+    opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
+    opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
+    drive = webdriver.Chrome(opcao)  # aqui uso a opção como argumento, ludmilo.
+        
+
 
     def __init__(self):
+
+        
+
+        
+        # self.opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
+        # self.opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
+        # self.drive = webdriver.Chrome(self.opcao)  # aqui uso a opção como argumento, ludmilo.
+
 
         bemvindo_bb = '''
             +===========================================================================+
@@ -33,6 +47,7 @@ class MainFiscal:
             +===========================================================================+
             '''
         print(bemvindo_bb)
+
 
         
     def VerificaSeExiste(self):
@@ -89,12 +104,10 @@ class MainFiscal:
 
         print(f'TODOS PROCESSOS FORAM CARREGADOS!, NUMERO TOTAL DE PROCESSOS SÃO DE : {len(self.lista_processos)}')
 
+
+   
     def Saj(self):
 
-        self.opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
-        self.opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
-        self.drive = webdriver.Chrome(self.opcao)  # aqui uso a opção como argumento, ludmilo.
-              
         url = 'https://saj.pgfn.fazenda.gov.br/saj/login.jsf?dswid=3754'
 
         self.drive.get(url) # chama o site
@@ -102,91 +115,80 @@ class MainFiscal:
         time.sleep(2)
 
         campo_login = self.drive.find_element(By.ID, "frmLogin:username")
-
         campo_senha = self.drive.find_element(By.ID, "frmLogin:password")
 
         campo_login.send_keys("44355326896")
-
         campo_senha.send_keys("mundo2024")
 
         botao_ok = self.drive.find_element(By.ID, "frmLogin:entrar")
-
-        time.sleep(2) 
-
+        time.sleep(2)
         botao_ok.click()
-
         time.sleep(3)
 
         botao_processo = self.drive.find_element(By.CLASS_NAME, "ui-menuitem-text")  # PEGA  ID DA LISTA > PROCESS
-        
-        webdriver.ActionChains(self.drive).move_to_element(botao_processo).perform() # MOVE MOUSE ATÉ A LISTA 
-
-        time.sleep(1) # TEMPO NECESSARIO
+        webdriver.ActionChains(self.drive).move_to_element(botao_processo).perform() # MOVE MOUSE ATÉ A LISTA
+        time.sleep(1) # TEMPO NECESSÁRIO
 
         botao_consulta = self.drive.find_element(By.XPATH, '//*[@id="j_idt15:formMenus:j_idt34"]/ul/li[1]/ul/li[2]').click() # PEGA O ITEM DA LISTA >>> Processo
-
         time.sleep(7)
-       
-        caminho_absoluto_saj = Path.cwd()
 
-        Pasta_Add_saj = \
-            'Resultado_Processos'
         
-        Processos = \
-              'dados_processos.xlsx'
-        
-        Caminho_Mais_Pasta_saj = caminho_absoluto_saj / Pasta_Add_saj
-
-        # Caminho_processo_e_pasta = Caminho_Mais_Pasta_saj / Processos # se caso precisar ja pega pasta e nome do dados processos
-
-        padrao_arquivo = '*.xlsx' # padrão do excel
-
-        ListaProcessos = glob.glob(str(Caminho_Mais_Pasta_saj / padrao_arquivo))
 
     
-        for caminho_do_arquivo in ListaProcessos:
+    def funcao(self):
 
-            dados = p.read_excel(caminho_do_arquivo)
-           
-        for processos_planilha in dados['Numero do Processo']:
+        caminho_absoluto_saj = Path.cwd()
 
+        Pasta_Add_saj = 'Resultado_Processos'
+        Processos = 'dados_processos.xlsx'
+        Caminho_Mais_Pasta_saj = caminho_absoluto_saj / Pasta_Add_saj
+
+        padrao_arquivo = '*.xlsx' # padrão do excel
+        self.ListaProcessos = glob.glob(str(Caminho_Mais_Pasta_saj / padrao_arquivo))
+
+        for self.caminho_do_arquivo1 in self.ListaProcessos:
+            self.dados = p.read_excel(self.caminho_do_arquivo1)
+
+        self.processos_iter = iter(self.dados['Numero do Processo'])
+
+        for processos_planilha in self.processos_iter:
             print(f' Lendo os Processos {processos_planilha}')
 
             caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input')
 
+
             caixa_pesquisa.click()
 
+            caixa_pesquisa.clear()
             time.sleep(1)
 
             caixa_pesquisa.send_keys(str(processos_planilha))
-
             time.sleep(1)
 
             # Clica no botão OK
             ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
 
-            
             try:
-                    # Se ele pular para o bloco except, significa que os processos já não estão mais cadastrados.
+                # Se ele pular para o bloco except, significa que os processos já não estão mais cadastrados.
 
-                    # Remove os dados da planilha relacionados ao processo
-                    indice_processo_cadastrado = dados[dados['Numero do Processo'] == processos_planilha].index
-                    dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
+                # Remove os dados da planilha relacionados ao processo
+                indice_processo_cadastrado = self.dados[self.dados['Numero do Processo'] == processos_planilha].index
+                self.dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
 
-                    # Definindo a variável de flag como True
-                    processo_encontrado = True
+                # Definindo a variável de flag como True
+                processo_encontrado = True
 
-                    caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
+                caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input').clear()
 
             except:
+                break
+                # Se ele cair no bloco except, significa que os processos já foram lidos, mas não foram cadastrados ainda
 
-                 break
-                    # Se ele cair no bloco except, significa que os processos já foram lidos, mas não foram cadastrados ainda
-                  
             if processo_encontrado:
-
                 # Salva os dados atualizados de volta à planilha
-                dados.to_excel(caminho_do_arquivo, index=False)
+                self.dados.to_excel(self.caminho_do_arquivo1, index=False)
+
+
 
                 
 
@@ -212,147 +214,200 @@ class MainFiscal:
 
         # agora vem o for pra pegar na "vara " :)
 
-        
         time.sleep(2)
 
-
-        caminho2 = Path.cwd()
-        caminho_mais_pasta = caminho2 / 'Resultado_Processos'
-        arquivo_excel = 'dados_processos*.xlsx'
-        resultado_para_for = caminho_mais_pasta.glob(arquivo_excel)
-
-        for caminho_do_arquivo in resultado_para_for:
-            dados2 = p.read_excel(caminho_do_arquivo)
-
-            for vara_judicial in dados2['Vara Judicial']:
-                # ADICONA UM HIFEN PARA PODER CONSULTAR NO SAJ, E TENTA REMOVER O ULTIMO "DE" COM EXPRESSAO REGULAR, AO MENOS ESTÁ FUNCIONANDO.
-
+        for vara_judicial in self.dados['Vara Judicial']:
                 try:
                     vara_judicial_formatada = vara_judicial.replace('São Paulo', '- SAO PAULO')
-
-                except:    
-                          
+                except:
                     continue
-
 
                 posicao_ultimo_de = vara_judicial_formatada.rfind(' de ')
 
                 if posicao_ultimo_de != -1:
                     vara_judicial_formatada = vara_judicial_formatada[:posicao_ultimo_de] + vara_judicial_formatada[posicao_ultimo_de + 3:]
 
-
                 print(f' Lendo a Vara Judicial: {vara_judicial_formatada}')
 
-               
                 elemento_selecao = self.drive.find_element(By.XPATH, "/html/body/div[7]/div/div/span[1]/form/div[2]/div[2]/div[1]/div[2]/table/tbody/tr[10]/td[2]/span/div/table/tbody/tr/td[1]/div/div/label").click()
 
-               
                 opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara_judicial_formatada}')]").click()
-
 
                 pegando_numero_processo_atual = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumeroProcesso:numeroProcesso"]')
 
-                # PEGANDO VALOR DO PROCESSO
                 numero_processo_atual = pegando_numero_processo_atual.get_attribute('value')
 
                 numero_formatado = numero_processo_atual.replace('-', '').replace('.', '')
-                # IMPRIMINDO VALOR 
+
                 print("Valor na caixa de entrada:", numero_formatado)
 
-
                 caminho_atual = Path.cwd()
-
                 caminho_atual_excel = caminho_atual / 'processos.xlsx'
 
                 dados_p = p.read_excel(caminho_atual_excel)
 
                 if numero_formatado in dados_p['PROCESSO TXT'].values:
-
-                    #  coluna 'CONTRATOS'
                     processo_cda = dados_p.loc[dados_p['PROCESSO TXT'] == numero_formatado, 'CONTRATOS'].values
-                    
-                    
                     print(f'Numero de Processo, e CDA  {numero_formatado}: {processo_cda}')
-
                 else:
                     print(f'O número {numero_formatado} não foi encontrado na coluna "PROCESSO TXT".')
 
-                
-                processo_cda_str = str(processo_cda[0]) # converte string objeto numpy
+        processo_cda_str = str(processo_cda[0])  # converte string objeto numpy
 
+        if len(processo_cda_str) > 13:  # verifico se tem duas CDAS se tiver vai ter que ser cadastrado duas vezes
+            expressao_do_diabo_regular = re.compile(r'\b(\w+\d+)\b')
+            processo_cda_lista = expressao_do_diabo_regular.findall(processo_cda_str)
 
-                if len(processo_cda_str) > 13: # verifico se tem duas CDAS se tiver vai ter que ser cadastrado duas vezes
+            valor_cda1 = processo_cda_lista[0]
+            valor_cda2 = processo_cda_lista[1]
+
+            print(valor_cda2)
+
+            caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
+            caixa_colocar_cda.click()
+            caixa_colocar_cda.send_keys(valor_cda1)
+
+            botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
+            botao_incluir.click()
+
+            time.sleep(1)
+
+            caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
+            caixa_colocar_cda.click()
+            caixa_colocar_cda.send_keys(valor_cda2)
+
+            botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
+            botao_incluir.click()
+
+            botao_voltar = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnVoltar"]')
+
+            botao_voltar.click()
+
+            try:
+                # Avança para o próximo índice da planilha
+                next_processos_planilha = next(self.processos_iter)
+                print(f' Lendo os Processos {next_processos_planilha}')   
+            except StopIteration:
+                ...
+
+            cla = MainFiscal()
+
+            cla.funcao()
+
+    
         
-                    expressao_do_diabo_regular = re.compile(r'\b(\w+\d+)\b')
-                    processo_cda_lista = expressao_do_diabo_regular.findall(processo_cda_str)
-
-                    valor_cda1 = processo_cda_lista[0]
-                    valor_cda2 = processo_cda_lista[1]
-
-                    print(valor_cda2)
-
-
-                    caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
-
-                    caixa_colocar_cda.click()  
-
-                    caixa_colocar_cda.send_keys(valor_cda1)
-
-
-                    botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
-                    botao_incluir.click()
-
-                    time.sleep(1)
-
-                    
-                    caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
-                    caixa_colocar_cda.click() 
-                    caixa_colocar_cda.send_keys(valor_cda2)
-
-                    botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
-                    botao_incluir.click()
-
-
-
-
-
-
-
-
-
-     
-
-                
-                
-
-
-
-
-
             
+           
+
+# Restante do código...
+
+        # Restante do código...
+
+        # else:
+
+        #     expressao_do_diabo_regular = re.compile(r'\b(\w+\d+)\b')
+        #     processo_cda_lista = expressao_do_diabo_regular.findall(processo_cda_str)
+
+        #     valor_unico = processo_cda_str
+
+        #     caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
+
+        #     caixa_colocar_cda.click()  
+
+        #     caixa_colocar_cda.send_keys(valor_unico)
+
+        #     botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
+
+        #     botao_incluir.click()
+
+        #     caminho_atual = Path.cwd()
+
+        #     caminho_atual_excel = caminho_atual / 'Resultado_Processos' / 'dados_processos.xlsx'
+
+        #     lendo_data_contribuicao = p.read_excel(caminho_atual_excel)
+
+        #             # PEGANDO O VALOR DO NUMERO DO PROCESSO, RELACIONADO NUMERO FORMATADO OU SEJA JA NO SAJ.
+
+        #     if lendo_data_contribuicao['Numero do Processo'].str.strip("'").isin([numero_formatado]).any():
+        #                 # Obtém o valor da coluna 'Data Distribuicao' para o número do processo especificado
+        #             valor_data_distribuicao = lendo_data_contribuicao.loc[lendo_data_contribuicao['Numero do Processo'].str.strip("'") == numero_formatado, 'Data Distribuicao'].values[0]
+                        
+        #             print(f'O valor de Data Distribuicao para o número do processo {numero_formatado}: {valor_data_distribuicao}')
+        #     continue 
+            
+    
+
+    
+                  
+    # def funcaoSaj(self):
+
+    #     time.sleep(2)
+
+    #     botao_processo = self.drive.find_element(By.CLASS_NAME, "ui-menuitem-text")  # PEGA  ID DA LISTA > PROCESS
+        
+    #     webdriver.ActionChains(self.drive).move_to_element(botao_processo).perform() # MOVE MOUSE ATÉ A LISTA 
+
+    #     time.sleep(1) # TEMPO NECESSARIO
+
+    #     botao_consulta = self.drive.find_element(By.XPATH, '//*[@id="j_idt15:formMenus:j_idt34"]/ul/li[1]/ul/li[2]').click() # PEGA O ITEM DA LISTA >>> Processo
+
+    #     time.sleep(4)
+
+    #     print(self.proximo_processo, 'valor do proximo processo aqui na funcao SAJ <<<')
 
 
-                
-
-                time.sleep(10)
-
-        # for vara in dados['Vara Judicial']:
-        #     print(f'Esta é a vara > {vara}')
-   
-        #     try:
-        #         opcao_vara = self.drive.find_element(By.XPATH, f"//li[contains(text(), '{vara}')]")
-
-        #         opcao_vara.click()
-
-                
-        #         time.sleep(2)
-
-        #     except Exception as e:
-        #         print(f"Erro ao clicar na opção da vara {vara}: {e}")
        
+    #     caminho_absoluto_saj = Path.cwd()
+
+    #     Pasta_Add_saj = \
+    #         'Resultado_Processos'
+        
+    #     Processos = \
+    #           'dados_processos.xlsx'
+        
+    #     Caminho_Mais_Pasta_saj = caminho_absoluto_saj / Pasta_Add_saj
+
+    #     # Caminho_processo_e_pasta = Caminho_Mais_Pasta_saj / Processos # se caso precisar ja pega pasta e nome do dados processos
+
+    #     padrao_arquivo = '*.xlsx' # padrão do excel
+
+    #     ListaProcessos = glob.glob(str(Caminho_Mais_Pasta_saj / padrao_arquivo))
+
+    #     for arquivo in ListaProcessos:
+    #         df = p.read_excel(arquivo)
+
+    #     # Verificar se o valor de self.proximo_processo existe na planilha
+    #     if self.proximo_processo in df.values:
+    #         # Encontrar a linha onde o valor existe
+    #         linha_inicial = df[df == self.proximo_processo].dropna(how='all').index[0]
+
+    #         # Iniciar o loop a partir dessa linha
+    #     for i in range(linha_inicial, len(df)):
+    #             # Seu código aqui
+    #             valor_encontrado = df.iloc[i]
+
+    #             caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input')
+
+    #             caixa_pesquisa.click()
+
+    #             time.sleep(1)
+
+    #             caixa_pesquisa.send_keys(str(valor_encontrado))
+
+    #             time.sleep(1)
+
+    #             # Clica no botão OK
+    #             ok_botao = self.drive.find_element(By.XPATH, '//*[@id="frmPesquisaProcessoJudicial:btnOK"]').click()
 
 
-      
+    #             time.sleep(20)
+
+
+
+
+        
+                
+
 
         
     def MeioPje(self):
@@ -473,3 +528,4 @@ Cl = MainFiscal()
 Cl.VerificaSeExiste()
 Cl.Inicio()
 Cl.Saj()
+Cl.funcao()
