@@ -25,7 +25,9 @@ class MainFiscal:
 
     def __init__(self):
 
-         
+        
+
+        
         # self.opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
         # self.opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
         # self.drive = webdriver.Chrome(self.opcao)  # aqui uso a opção como argumento, ludmilo.
@@ -307,8 +309,6 @@ class MainFiscal:
                         processo_cda_lista = expressao_do_diabo_regular.findall(processo_cda_str)
 
                         valor_cdal = processo_cda_lista[0]
-
-                        print(valor_cda1)
 
                         caixa_colocar_cda = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:inNumInscrFGTS:numInscrFGTS"]')
 
