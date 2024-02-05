@@ -6,6 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import os 
 import time
@@ -210,6 +211,34 @@ class MainFiscal:
                 else:
                     print(f'O número {numero_formatado} não foi encontrado na coluna "PROCESSO TXT".')
 
+                    
+    # def data(self):
+
+    #     caminho_absoluto_saj_ = Path.cwd()
+    #     Pasta_Add_saj_ = 'Resultado_Processos'
+    #     Processos_ = 'dados_processos.xlsx'
+    #     Caminho_Mais_Pasta_saj_ = caminho_absoluto_saj_ / Pasta_Add_saj_
+
+    #     padrao_arquivo_ = '*.xlsx' # padrão do excel
+    #     ListaProcessos_ = glob.glob(str(Caminho_Mais_Pasta_saj_ / padrao_arquivo_))
+
+    #     for caminho_do_arquivo1 in ListaProcessos_:
+    #         dados2 = p.read_excel(caminho_do_arquivo1)
+            
+    #     for data in dados2['Data Distribuicao']:
+        
+    #         elemento_data = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:dataProtocoloJustica:calendar_input"]')
+
+    #         self.drive.execute_script("arguments[0].value = arguments[1];", elemento_data, data)
+        
+
+
+
+            
+
+
+
+
     
     def funcao(self):
             caminho_absoluto_saj = Path.cwd()
@@ -253,10 +282,9 @@ class MainFiscal:
                     indice_processo_cadastrado = self.dados[self.dados['Numero do Processo'] == processos_planilha].index
                     self.dados.loc[indice_processo_cadastrado, ['Data Distribuicao', 'Vara Judicial']] = ''
 
-                    # Definindo a variável de flag como True
-                    processo_encontrado = True
-
                     caixa_pesquisa = self.drive.find_element(By.XPATH, '/html/body/div[7]/div/div/span[2]/form/div[1]/div[2]/table/tbody/tr/td[2]/div/table/tbody/tr/td[1]/div/input')
+                    
+                    self.dados.to_excel(self.caminho_do_arquivo1, index=False)
 
                 except:
 
@@ -265,7 +293,8 @@ class MainFiscal:
                     self.clica()
                     self.vara()
 
-                      # converte string objeto numpy
+
+
                     processo_cda_str = str(self.processo_cda[0])
                     if len(processo_cda_str) > 13:  # verifico se tem duas CDAS, se tiver, será necessário cadastrar duas vezes
                         
@@ -295,6 +324,18 @@ class MainFiscal:
                         botao_incluir = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnIncluirInscrFGTS"]')
                         botao_incluir.click()
 
+                        # self.data()
+
+                        elemento_data = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:dataProtocoloJustica:calendar_input"]')
+
+                        self.drive.execute_script("arguments[0].value = arguments[1];", elemento_data, '01/02/2023')
+
+                        time.sleep(10)
+
+
+
+
+                
                         botao_voltar = self.drive.find_element(By.XPATH, '//*[@id="frmCadastro:btnVoltar"]')
                         botao_voltar.click()
 
@@ -333,12 +374,9 @@ class MainFiscal:
                     # except:
 
                     #     break
-                    if processo_encontrado:
-                        print(' TA CAINDO AQUI if ')
-                        # Salva os dados atualizados de volta à planilha
-                        self.dados.to_excel(self.caminho_do_arquivo1, index=False)
+                 
 
-                continue
+                
                     
             
 
