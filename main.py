@@ -115,7 +115,7 @@ class MainFiscal:
         campo_login = self.drive.find_element(By.ID, "frmLogin:username")
         campo_senha = self.drive.find_element(By.ID, "frmLogin:password")
 
-        campo_login.send_keys("44355326896")
+        campo_login.send_keys("******")
         campo_senha.send_keys("mundo2024")
 
         botao_ok = self.drive.find_element(By.ID, "frmLogin:entrar")
