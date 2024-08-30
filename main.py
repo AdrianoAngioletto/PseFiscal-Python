@@ -21,6 +21,7 @@ class MainFiscal:
     opcao = webdriver.ChromeOptions()  # chama classe chrome opcao, tendeu??
     opcao.add_argument("--start-maximized")  # adiciona o argumento da classe opcao bb
     drive = webdriver.Chrome(opcao)  # aqui uso a opção como argumento, ludmilo.
+    # testes.
         
 
 
